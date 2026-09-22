@@ -305,7 +305,7 @@ async function reverseGeocode(lat, lng) {
 function refreshLokasiUI() {
   const db = getDB();
   const badge = document.getElementById('gpsBadge');
-  const isGps = !KOTA_LIST.some(k => k.label === db.settings.kotaLabel);
+  const isGps = !KOTA_LIST.some(k => k.label === db.settings.kotaLabel) && !String(db.settings.kotaLabel || '').includes('(default)');
   if (badge) {
     badge.textContent = isGps ? 'GPS aktif' : 'GPS nonaktif';
   }
