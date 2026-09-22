@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kas Masjid — Dashboard Keuangan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#0F172A',
+        secondary: '#1E3A8A',
+        accent: '#A16207',
+        accentlight: '#FEF3C7',
+        bgpage: '#F8FAFC',
+        card: '#FFFFFF',
+        muted: '#E8ECF1',
+        borderc: '#E2E8F0',
+      },
+      fontFamily: {
+        display: ['Lexend', 'sans-serif'],
+        body: ['"Source Sans 3"', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-bgpage font-body text-slate-900">
+
+<div class="flex min-h-screen">
+  <!-- Sidebar Desktop -->
+  <aside class="hidden lg:flex w-72 flex-col bg-primary text-white shrink-0 min-h-screen sticky top-0 h-screen">
+    <div class="p-6 flex items-center gap-3 border-b border-white/10">
+      <div class="w-11 h-11 rounded-2xl bg-accent flex items-center justify-center font-display font-bold text-xl">M</div>
+      <div>
+        <p id="brandName" class="font-display font-semibold leading-tight">Masjid Al-Barokah</p>
+        <p class="text-xs text-white/60">Kas Masjid Dummy</p>
+      </div>
+    </div>
+    <nav class="p-4 space-y-1 text-sm flex-1" id="sideNav">
+      <button data-page="dashboard" class="navbtn active">Dashboard</button>
+      <button data-page="transaksi" class="navbtn">Transaksi</button>
+      <button data-page="laporan" class="navbtn">Laporan</button>
+      <button data-page="jadwal" class="navbtn">Jadwal Sholat</button>
+      <button data-page="puasa" class="navbtn">Puasa &amp; Imsak</button>
+      <button data-page="pengaturan" class="navbtn">Pengaturan</button>
+    </nav>
+    <div class="p-4">
+      <div class="rounded-2xl bg-white/10 p-4">
+        <p class="text-xs text-white/70">Saldo Kas</p>
+        <p id="sideSaldo" class="font-display font-bold text-xl">Rp 0</p>
+        <p id="sideHijri" class="text-xs text-white/60 mt-1">—</p>
+      </div>
+      <p class="text-[11px] text-white/40 mt-3">Database lokal • localStorage<br>Aladhan API • Metode Kemenag RI</p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 min-w-0">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-borderc">
+      <div class="px-4 md:px-8 py-3 flex items-center gap-3">
+        <div class="lg:hidden w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold">M</div>
+        <div class="min-w-0">
+          <h1 class="font-display font-semibold truncate" id="topTitle">Dashboard Keuangan</h1>
+          <p class="text-xs text-slate-500 truncate"><span id="topDate">—</span> • <span id="topLokasi">Lokasi belum aktif</span></p>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <span id="gpsBadge" class="hidden md:inline-flex text-xs px-3 py-1.5 rounded-full bg-slate-100">GPS nonaktif</span>
+          <button id="btnGPS" class="btn-accent text-sm">Aktifkan GPS</button>
+          <button id="btnTambah" class="btn-primary text-sm">+ Transaksi</button>
+        </div>
+      </div>
+      <!-- Mobile nav -->
+      <nav class="lg:hidden flex gap-2 overflow-x-auto px-4 pb-3" id="mobileNav">
+        <button data-page="dashboard" class="mnavbtn active">Dashboard</button>
+        <button data-page="transaksi" class="mnavbtn">Transaksi</button>
+        <button data-page="laporan" class="mnavbtn">Laporan</button>
+        <button data-page="jadwal" class="mnavbtn">Sholat</button>
+        <button data-page="puasa" class="mnavbtn">Puasa</button>
+        <button data-page="pengaturan" class="mnavbtn">Setting</button>
+      </nav>
+    </header>
+
+    <main class="px-4 md:px-8 py-6 max-w-7xl mx-auto space-y-6 pb-24 lg:pb-10">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section data-section="dashboard" class="page space-y-6">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="stat-card">
+            <p class="stat-label">Total Saldo</p>
+            <p id="stSaldo" class="stat-value">Rp 0</p>
+            <p class="stat-sub" id="stSaldoSub">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Pemasukan Bulan Ini</p>
+            <p id="stMasuk" class="stat-value text-emerald-600">Rp 0</p>
+            <p class="stat-sub" id="stMasukSub">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Pengeluaran Bulan Ini</p>
+            <p id="stKeluar" class="stat-value text-rose-600">Rp 0</p>
+            <p class="stat-sub" id="stKeluarSub">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Transaksi Bulan Ini</p>
+            <p id="stCount" class="stat-value">0</p>
+            <p class="stat-sub">pemasukan + pengeluaran</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-4">
+          <div class="card lg:col-span-2">
+            <div class="card-head">
+              <div><h3>Arus Kas 6 Bulan</h3><p class="card-sub">Pemasukan vs pengeluaran</p></div>
+            </div>
+            <div class="h-64"><canvas id="chArus"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>Kategori Bulan Ini</h3><p class="card-sub">Distribusi pemasukan</p></div></div>
+            <div class="h-64"><canvas id="chDonat"></canvas></div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-4">
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Sholat Berikutnya</h3><p class="card-sub" id="miniLokasi">Belum ada lokasi</p></div>
+              <button class="linkbtn" data-goto="jadwal">Lihat</button>
+            </div>
+            <div class="text-center py-2">
+              <p id="miniNextName" class="font-display font-bold text-2xl">—</p>
+              <p id="miniNextTime" class="text-4xl font-display font-bold text-secondary">--:--</p>
+              <p id="miniCountdown" class="text-sm text-accent font-semibold mt-1">—</p>
+              <div id="miniList" class="mt-4 space-y-1.5 text-sm text-left"></div>
+            </div>
+          </div>
+          <div class="card lg:col-span-2">
+            <div class="card-head">
+              <div><h3>Transaksi Terbaru</h3><p class="card-sub">5 aktivitas terakhir</p></div>
+              <button class="linkbtn" data-goto="transaksi">Semua</button>
+            </div>
+            <div class="overflow-x-auto"><table class="tbl"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th class="text-right">Nominal</th></tr></thead><tbody id="tbRecent"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TRANSAKSI ============ -->
+      <section data-section="transaksi" class="page hidden space-y-4">
+        <div class="card">
+          <div class="card-head flex-wrap gap-2">
+            <div><h3>Data Transaksi</h3><p class="card-sub">Cari &amp; saring — grafik dan tabel mengikuti filter</p></div>
+            <div class="ml-auto flex flex-wrap gap-2 items-center">
+              <input id="fSearch" placeholder="Cari keterangan..." class="inp w-44">
+              <select id="fJenis" class="inp w-36"><option value="">Semua jenis</option><option value="masuk">Pemasukan</option><option value="keluar">Pengeluaran</option></select>
+              <select id="fKategori" class="inp w-40"><option value="">Semua kategori</option></select>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center bg-slate-50 border border-borderc rounded-xl p-3 text-sm">
+            <select id="fPeriode" class="inp w-44">
+              <option value="semua">Semua waktu</option>
+              <option value="30hari">30 hari terakhir</option>
+              <option value="bulan">Bulan tertentu</option>
+              <option value="range">Range tanggal</option>
+            </select>
+            <input id="fBulan" type="month" class="inp w-44">
+            <input id="fDari" type="date" class="inp">
+            <input id="fSampai" type="date" class="inp">
+            <span id="transCount" class="text-xs text-slate-500 ml-auto">0 data</span>
+            <button id="btnExportCsv" class="btn-ghost text-sm">CSV</button>
+            <button id="btnExportTransPdf" class="btn-accent text-sm">PDF</button>
+            <button id="btnExportTransWord" class="btn-ghost text-sm">Word</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Grafik Detail Harian</h3><p class="card-sub">Nominal per hari • <span id="transTrenLabel">—</span></p></div></div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 text-center">
+            <div class="bg-emerald-50 rounded-xl p-2.5"><p class="text-[11px] uppercase tracking-wide text-emerald-700 font-semibold">Masuk</p><p id="transSumMasuk" class="font-display font-bold text-emerald-700">Rp 0</p></div>
+            <div class="bg-rose-50 rounded-xl p-2.5"><p class="text-[11px] uppercase tracking-wide text-rose-700 font-semibold">Keluar</p><p id="transSumKeluar" class="font-display font-bold text-rose-600">Rp 0</p></div>
+            <div class="bg-slate-100 rounded-xl p-2.5"><p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Selisih</p><p id="transSumNet" class="font-display font-bold">Rp 0</p></div>
+            <div class="bg-slate-100 rounded-xl p-2.5"><p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Rata2 / transaksi</p><p id="transSumAvg" class="font-display font-bold">Rp 0</p></div>
+          </div>
+          <div class="h-72"><canvas id="chTransTren"></canvas></div>
+          <div class="grid lg:grid-cols-5 gap-3 mt-3">
+            <div class="lg:col-span-2 border border-borderc rounded-xl p-3">
+              <p class="text-sm font-semibold font-display">Per Kategori</p>
+              <div class="h-56"><canvas id="chTransKat"></canvas></div>
+            </div>
+            <div class="lg:col-span-3 border border-borderc rounded-xl p-3">
+              <p class="text-sm font-semibold font-display">Top 5 Hari Terbesar</p>
+              <div class="overflow-x-auto"><table class="tbl"><thead><tr><th>Tanggal</th><th>Hari</th><th class="text-right">Masuk</th><th class="text-right">Keluar</th><th class="text-right">Total</th></tr></thead><tbody id="tbTopHari"></tbody></table></div>
+            </div>
+          </div>
+          <p id="transChartEmpty" class="hidden text-center text-sm text-slate-400 pt-3">Belum ada data pada filter ini — grafik kosong.</p>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Daftar Transaksi</h3><p class="card-sub">Rincian per transaksi pada filter aktif</p></div></div>
+          <div class="overflow-x-auto"><table class="tbl"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th>Jenis</th><th>Bukti</th><th class="text-right">Nominal</th><th class="text-right">Aksi</th></tr></thead><tbody id="tbTrans"></tbody></table></div>
+          <p id="transEmpty" class="hidden text-center text-sm text-slate-500 py-6">Belum ada transaksi pada filter ini.</p>
+        </div>
+      </section>
+
+      <!-- ============ LAPORAN ============ -->
+      <section data-section="laporan" class="page hidden space-y-4">
+        <div class="card">
+          <div class="card-head flex-wrap gap-2">
+            <div><h3>Laporan Keuangan</h3><p class="card-sub">Pilih periode: 30 hari • bulan • range — ekspor PDF/Word mengikuti periode</p></div>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center bg-slate-50 border border-borderc rounded-xl p-3 mb-3 text-sm">
+            <select id="lapMode" class="inp w-44">
+              <option value="bulan">Bulan tertentu</option>
+              <option value="30hari">30 hari terakhir</option>
+              <option value="range">Range tanggal</option>
+            </select>
+            <input id="lapBulan" type="month" class="inp">
+            <input id="lapDari" type="date" class="inp">
+            <input id="lapSampai" type="date" class="inp">
+            <span id="lapPeriodeLabel" class="text-xs text-slate-500"></span>
+            <div class="ml-auto flex gap-2">
+              <button id="btnLapPdf" class="btn-accent text-sm">Ekspor PDF</button>
+              <button id="btnLapWord" class="btn-ghost text-sm">Word</button>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-3 gap-3" id="lapCards"></div>
+          <div class="overflow-x-auto mt-4"><table class="tbl"><thead><tr><th>Kategori</th><th class="text-right">Masuk</th><th class="text-right">Keluar</th><th class="text-right">Net</th></tr></thead><tbody id="tbLap"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ============ JADWAL SHOLAT ============ -->
+      <section data-section="jadwal" class="page hidden space-y-4">
+        <div class="card">
+          <div class="card-head flex-wrap gap-2">
+            <div><h3>Jadwal Sholat Harian</h3><p class="card-sub" id="jadwalSub">Sumber: Aladhan API • Metode Kemenag RI (20)</p></div>
+            <div class="ml-auto flex flex-wrap gap-2">
+              <select id="selKota" class="inp w-52"></select>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span id="lokasiInfo" class="px-3 py-1.5 bg-slate-100 rounded-full">Lokasi: default Jakarta</span>
+            <span id="hijriInfo" class="px-3 py-1.5 bg-accentlight rounded-full">Hijriah: —</span>
+            <span id="nextInfo" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-semibold">—</span>
+          </div>
+          <div id="gridSholat" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4"></div>
+        </div>
+        <div class="card">
+          <div class="card-head flex-wrap gap-2"><div><h3 id="jadwalTableTitle">Jadwal 30 Hari ke Depan</h3><p class="card-sub">Pilih periode lalu ekspor PDF / Word — mengikuti tabel yang tampil</p></div></div>
+          <div class="flex flex-wrap gap-2 items-center bg-slate-50 border border-borderc rounded-xl p-3 mb-3 text-sm">
+            <select id="jadwalMode" class="inp w-44">
+              <option value="30hari">30 hari ke depan</option>
+              <option value="bulan">Bulan tertentu</option>
+              <option value="range">Range tanggal</option>
+            </select>
+            <input id="jadwalBulan" type="month" class="inp">
+            <input id="jadwalDari" type="date" class="inp">
+            <input id="jadwalSampai" type="date" class="inp">
+            <button id="btnTerapkanJadwal" class="btn-primary text-sm">Tampilkan</button>
+            <span id="jadwalCount" class="text-xs text-slate-500"></span>
+            <div class="ml-auto flex gap-2">
+              <button id="btnJadwalPdf" class="btn-accent text-sm">PDF</button>
+              <button id="btnJadwalWord" class="btn-ghost text-sm">Word</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto max-h-96 overflow-y-auto"><table class="tbl"><thead><tr><th>Tanggal</th><th>Imsak</th><th>Subuh</th><th>Terbit</th><th>Dzuhur</th><th>Ashar</th><th>Maghrib</th><th>Isya</th></tr></thead><tbody id="tbJadwal30"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ============ PUASA ============ -->
+      <section data-section="puasa" class="page hidden space-y-4">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="stat-card text-center"><p class="stat-label">Imsak Hari Ini</p><p id="puImsak" class="stat-value">--:--</p><p class="stat-sub">Batas sahur</p></div>
+          <div class="stat-card text-center"><p class="stat-label">Buka Puasa (Maghrib)</p><p id="puBuka" class="stat-value text-accent">--:--</p><p class="stat-sub" id="puDurasi">Durasi —</p></div>
+          <div class="stat-card text-center"><p class="stat-label">Puasa Sunnah Terdekat</p><p id="puNext" class="stat-value text-secondary text-lg">—</p><p class="stat-sub" id="puNextDate">—</p></div>
+        </div>
+        <div class="card">
+          <div class="card-head flex-wrap gap-2">
+            <div><h3 id="puasaTableTitle">Jadwal Puasa 7 Hari</h3><p class="card-sub">Imsak • Buka • Durasi — periode fleksibel, ekspor mengikuti tabel</p></div>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center bg-slate-50 border border-borderc rounded-xl p-3 mb-3 text-sm">
+            <select id="puasaMode" class="inp w-44">
+              <option value="7hari">7 hari ke depan</option>
+              <option value="30hari">30 hari ke depan</option>
+              <option value="bulan">Bulan tertentu</option>
+              <option value="range">Range tanggal</option>
+            </select>
+            <input id="puasaBulan" type="month" class="inp">
+            <input id="puasaDari" type="date" class="inp">
+            <input id="puasaSampai" type="date" class="inp">
+            <button id="btnTerapkanPuasa" class="btn-primary text-sm">Tampilkan</button>
+            <span id="puasaCount" class="text-xs text-slate-500"></span>
+            <div class="ml-auto flex gap-2"><button id="btnPuasaPdf" class="btn-accent text-sm">PDF</button><button id="btnPuasaWord" class="btn-ghost text-sm">Word</button></div>
+          </div>
+          <div class="overflow-x-auto"><table class="tbl"><thead><tr><th>Tanggal</th><th>Hari</th><th>Imsak</th><th>Buka</th><th>Durasi</th><th>Puasa Sunnah</th></tr></thead><tbody id="tbPuasa"></tbody></table></div>
+          <div class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50"><b>Senin &amp; Kamis</b><br><span class="text-slate-600">Puasa sunnah mingguan. Niat malam hari, sahur sebelum imsak.</span></div>
+            <div class="p-4 rounded-xl bg-slate-50"><b>Ayyamul Bidh (13-15)</b><br><span class="text-slate-600" id="bidhInfo">Jatuh pada tanggal hijriah 13, 14, 15 setiap bulan.</span></div>
+            <div class="p-4 rounded-xl bg-slate-50"><b>Ramadan</b><br><span class="text-slate-600" id="ramadanInfo">Menghitung mundur otomatis berdasarkan kalender hijriah.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PENGATURAN ============ -->
+      <section data-section="pengaturan" class="page hidden space-y-4">
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="card space-y-3">
+            <h3>Profil Masjid</h3>
+            <p class="text-xs text-slate-500">Nama masjid tampil di sidebar, topbar, dan otomatis tercetak di semua file ekspor PDF / Word.</p>
+            <label class="lbl">Nama masjid<input id="setNama" class="inp" placeholder="cth: Masjid Al-Barokah"></label>
+            <label class="lbl">Alamat<input id="setAlamat" class="inp"></label>
+            <label class="lbl">Saldo awal (Rp)<input id="setSaldo" type="number" class="inp"></label>
+            <label class="lbl">Metode hisab<select id="setMethod" class="inp"><option value="20">Kemenag RI (20) — Recommended</option><option value="2">ISNA</option><option value="3">MWL</option><option value="5">Egyptian</option><option value="11">Singapore</option></select></label>
+            <button id="btnSimpanSet" class="btn-primary text-sm w-full">Simpan Pengaturan</button>
+          </div>
+          <div class="card space-y-3">
+            <h3>Tema Website</h3>
+            <p class="text-xs text-slate-500">Pilih tema khas masjid. Tersimpan otomatis di database lokal &amp; diterapkan ke seluruh halaman.</p>
+            <div id="themeGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <label class="lbl text-xs">Primer<input id="thPrimary" type="color" class="inp !p-1 h-10 w-full cursor-pointer"></label>
+              <label class="lbl text-xs">Sekunder<input id="thSecondary" type="color" class="inp !p-1 h-10 w-full cursor-pointer"></label>
+              <label class="lbl text-xs">Aksen<input id="thAccent" type="color" class="inp !p-1 h-10 w-full cursor-pointer"></label>
+            </div>
+            <button id="btnSimpanTema" class="btn-accent text-sm w-full">Simpan Tema Kustom</button>
+            <button id="btnResetTema" class="btn-ghost text-sm w-full">Kembalikan Default</button>
+          </div>
+          <div class="card space-y-3">
+            <h3>Tampilan</h3>
+            <div class="flex items-center gap-3">
+              <label class="switch"><input id="setDark" type="checkbox"><span class="track"></span></label>
+              <div><p class="text-sm font-semibold">Mode gelap AMOLED</p><p class="text-xs text-slate-500">Hitam pekat, mengikuti warna tema yang dipilih.</p></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="switch"><input id="setShadow" type="checkbox"><span class="track"></span></label>
+              <div><p class="text-sm font-semibold">Shadow 3D pada kartu</p><p class="text-xs text-slate-500">Bayangan lembut agar kartu terlihat terangkat &amp; estetik.</p></div>
+            </div>
+            <label class="lbl text-xs">Intensitas shadow
+              <select id="setShadowInt" class="inp">
+                <option value="lembut">Lembut</option>
+                <option value="sedang">Sedang</option>
+                <option value="kuat">Kuat</option>
+              </select>
+            </label>
+          </div>
+          <div class="card space-y-3">
+            <h3>Database Lokal</h3>
+            <p class="text-sm text-slate-600">Semua transaksi tersimpan di <code>localStorage</code> browser (<span id="dbInfo">—</span>). Backup rutin sebagai JSON.</p>
+            <div class="flex flex-wrap gap-2">
+              <button id="btnBackup" class="btn-ghost text-sm">Backup JSON</button>
+              <label class="btn-ghost text-sm cursor-pointer">Restore JSON<input id="fileRestore" type="file" accept=".json" class="hidden"></label>
+              <button id="btnResetDummy" class="btn-accent text-sm">Reset ke Data Dummy</button>
+              <button id="btnHapusSemua" class="btn-danger text-sm">Hapus Semua</button>
+            </div>
+            <div class="border-t border-borderc pt-3 space-y-2">
+              <h3>Auto Backup Harian</h3>
+              <div class="flex items-center gap-3">
+                <label class="switch"><input id="setAutoBackup" type="checkbox"><span class="track"></span></label>
+                <div><p class="text-sm font-semibold">Backup otomatis tiap hari</p><p class="text-xs text-slate-500">File <code>kas-masjid-YYYY-MM-DD.json</code> ditulis ke folder pilihan saat aplikasi dibuka / ada transaksi baru.</p></div>
+              </div>
+              <p id="fsSupportNote" class="hidden text-xs text-amber-600">Browser ini tidak mendukung akses folder otomatis (perlu Chrome / Edge). Gunakan tombol Backup JSON manual di atas.</p>
+              <div class="flex flex-wrap gap-2 items-center">
+                <button id="btnPilihFolder" class="btn-ghost text-sm">Pilih Folder Backup</button>
+                <span id="folderName" class="text-xs text-slate-500">Belum ada folder dipilih</span>
+              </div>
+              <p class="text-xs text-slate-500">Backup otomatis terakhir: <b id="lastBackup">—</b></p>
+              <button id="btnRestoreOtomatis" class="btn-primary text-sm w-full">Restore Otomatis dari Folder</button>
+            </div>
+            <h3 class="pt-2">Kategori</h3>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div><p class="font-semibold text-emerald-700 mb-1">Pemasukan</p><ul id="listKatMasuk" class="space-y-1 text-slate-600"></ul></div>
+              <div><p class="font-semibold text-rose-700 mb-1">Pengeluaran</p><ul id="listKatKeluar" class="space-y-1 text-slate-600"></ul></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+    <footer class="px-4 md:px-8 pb-10 text-center text-xs text-slate-400">
+      <span id="footMasjid">Masjid Al-Barokah</span> • Data tersimpan lokal •
+      <a href="https://salshya-club.vercel.app/" target="_blank" rel="noopener" class="font-semibold text-secondary hover:underline">by Salshya-Dev</a>
+    </footer>
+  </div>
+</div>
+
+<!-- Tombol melayang Hubungi Dev -->
+<a href="https://salshya-club.vercel.app/" target="_blank" rel="noopener" id="fabDev" title="Hubungi Dev">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  <span>Hubungi Dev</span>
+</a>
+
+<!-- Modal transaksi -->
+<div id="modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-3 max-h-[92vh] overflow-y-auto">
+    <h3 id="modalTitle" class="font-display font-semibold text-lg">Tambah Transaksi</h3>
+    <input id="mId" type="hidden">
+    <label class="lbl">Tanggal<input id="mTanggal" type="date" class="inp"></label>
+    <label class="lbl">Jenis<select id="mJenis" class="inp"><option value="masuk">Pemasukan</option><option value="keluar">Pengeluaran</option></select></label>
+    <label class="lbl">Kategori<select id="mKategori" class="inp"></select></label>
+    <label class="lbl">Keterangan<input id="mKet" class="inp" placeholder="cth: Infaq Jumat"></label>
+    <label class="lbl">Nominal (Rp)<input id="mNominal" type="number" min="0" class="inp" placeholder="500000"></label>
+    <label class="lbl">Donatur / Penerima (opsional)<input id="mPihak" class="inp" placeholder="Hamba Allah"></label>
+    <div class="lbl">Bukti transaksi (opsional)
+      <input id="mBukti" type="file" accept="image/*" class="inp file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-slate-100 file:font-semibold file:cursor-pointer">
+      <p class="text-[11px] font-normal text-slate-500">Foto struk/nota. Otomatis dikompres &amp; tersimpan di database lokal. Maks ~5MB total localStorage.</p>
+      <div id="buktiPreviewWrap" class="hidden items-center gap-3 bg-slate-50 border border-borderc rounded-xl p-2.5">
+        <img id="buktiPreview" alt="Pratinjau bukti" class="w-16 h-16 object-cover rounded-lg border cursor-pointer">
+        <div class="text-xs">
+          <p id="buktiInfo" class="text-slate-500">—</p>
+          <div class="flex gap-2 mt-1">
+            <button type="button" id="btnLihatBukti" class="linkbtn">Lihat</button>
+            <button type="button" id="btnHapusBukti" class="linkbtn !text-rose-600">Hapus</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 pt-2">
+      <button id="btnBatal" class="btn-ghost flex-1">Batal</button>
+      <button id="btnSimpanTrans" class="btn-primary flex-1">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox bukti -->
+<div id="buktiModal" class="hidden fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4">
+  <div class="max-w-2xl w-full text-center">
+    <img id="buktiBesar" alt="Bukti transaksi" class="max-h-[80vh] mx-auto rounded-2xl shadow-2xl">
+    <p id="buktiCaption" class="text-white/80 text-sm mt-3"></p>
+    <button id="btnTutupBukti" class="btn-ghost mt-3 !bg-white">Tutup</button>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-primary text-white text-sm shadow-xl"></div>
+
+<script src="assets/js/db.js"></script>
+<script src="assets/js/dummy.js"></script>
+<script src="assets/js/prayer.js"></script>
+<script src="assets/js/export.js"></script>
+<script src="assets/js/autobackup.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
