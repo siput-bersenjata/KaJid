@@ -20,9 +20,8 @@
   <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bg)"/>
   <rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="#F5C542" stroke-opacity="0.35" stroke-width="1.5"/>
   <g filter="url(#soft)">
-    <circle cx="27" cy="34" r="17" fill="url(#gold)"/>
-    <circle cx="35" cy="28" r="14" fill="url(#cut)"/>
-    <path d="M43,33 L44.9,38.4 L50.6,38.5 L46,42 L47.7,47.5 L43,44.2 L38.3,47.5 L40,42 L35.4,38.5 L41.1,38.4 Z" fill="url(#gold)"/>
+    <circle cx="29" cy="33" r="18" fill="url(#gold)"/>
+    <circle cx="38" cy="26" r="15" fill="url(#cut)"/>
   </g>
-  <ellipse cx="22" cy="24" rx="6" ry="3.2" fill="#fff" opacity="0.28" transform="rotate(-25 22 24)"/>
+  <ellipse cx="23" cy="23" rx="6.5" ry="3.4" fill="#fff" opacity="0.28" transform="rotate(-25 23 23)"/>
 </svg>
