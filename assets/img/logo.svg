@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E5B43"/>
+      <stop offset="1" stop-color="#04150F"/>
+    </linearGradient>
+    <radialGradient id="gold" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#FFEDB0"/>
+      <stop offset="0.45" stop-color="#F5C542"/>
+      <stop offset="1" stop-color="#9A5B00"/>
+    </radialGradient>
+    <linearGradient id="cut" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E5B43"/>
+      <stop offset="1" stop-color="#04150F"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bg)"/>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="#F5C542" stroke-opacity="0.35" stroke-width="1.5"/>
+  <g filter="url(#soft)">
+    <circle cx="27" cy="34" r="17" fill="url(#gold)"/>
+    <circle cx="35" cy="28" r="14" fill="url(#cut)"/>
+    <path d="M43,33 L44.9,38.4 L50.6,38.5 L46,42 L47.7,47.5 L43,44.2 L38.3,47.5 L40,42 L35.4,38.5 L41.1,38.4 Z" fill="url(#gold)"/>
+  </g>
+  <ellipse cx="22" cy="24" rx="6" ry="3.2" fill="#fff" opacity="0.28" transform="rotate(-25 22 24)"/>
+</svg>

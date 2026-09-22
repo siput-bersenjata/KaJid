@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kas Masjid — Dashboard Keuangan</title>
+<title>KaJid — Dashboard Kas Masjid</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
@@ -40,7 +41,7 @@ tailwind.config = {
   <!-- Sidebar Desktop -->
   <aside class="hidden lg:flex w-72 flex-col bg-primary text-white shrink-0 min-h-screen sticky top-0 h-screen">
     <div class="p-6 flex items-center gap-3 border-b border-white/10">
-      <div class="w-11 h-11 rounded-2xl bg-accent flex items-center justify-center font-display font-bold text-xl">M</div>
+      <img src="assets/img/logo.svg" alt="Logo KaJid" class="w-11 h-11 rounded-2xl shadow-lg">
       <div>
         <p id="brandName" class="font-display font-semibold leading-tight">Masjid Al-Barokah</p>
         <p class="text-xs text-white/60">Kas Masjid Dummy</p>
@@ -69,7 +70,7 @@ tailwind.config = {
     <!-- Topbar -->
     <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-borderc">
       <div class="px-4 md:px-8 py-3 flex items-center gap-3">
-        <div class="lg:hidden w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold">M</div>
+        <div class="lg:hidden w-10 h-10 rounded-xl overflow-hidden shrink-0"><img src="assets/img/logo.svg" alt="Logo" class="w-10 h-10"></div>
         <div class="min-w-0">
           <h1 class="font-display font-semibold truncate" id="topTitle">Dashboard Keuangan</h1>
           <p class="text-xs text-slate-500 truncate"><span id="topDate">—</span> • <span id="topLokasi">Lokasi belum aktif</span></p>
